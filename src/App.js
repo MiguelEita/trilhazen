@@ -97,28 +97,27 @@ useEffect(() => {
     setShowPopup(false);
   }
 
-  return (
+return (
     <div className="container">
       
+      {/* ============================================== */}
+      {/* ETAPA 0: SPLASH SCREEN (Corrigido)             */}
+      {/* ============================================== */}
+      {step === 0 && (
+        <div className="splash-screen">
+          <h1 className="splash-logo">TrilhaZen</h1>
+          <p className="splash-tagline">Aprender nunca foi tão tranquilo.</p>
+        </div>
+      )}
+
+      {/* ============================================== */}
+      {/* POP-UP DO MINDCARE (Já existia)                */}
+      {/* ============================================== */}
       {showPopup && <MindCarePopup onClose={fecharPopup} />}
-
-      <div className="container">
-
-  {/* ============================================== */}
-  {/* !! NOVO !! ETAPA 0: SPLASH SCREEN               */}
-  {/* ============================================== */}
-  {step === 0 && (
-    <div className="splash-screen">
-      <h1 className="splash-logo">TrilhaZen</h1>
-      <p className="splash-tagline">Aprender nunca foi tão tranquilo.</p>
-    </div>
-  )}
-
-  {showPopup && <MindCarePopup onClose={fecharPopup} />}
-
-  {/* ETAPA 1 ... (o resto do seu código continua aqui) */}
       
-      {/* ETAPA 1 */}
+      {/* ============================================== */}
+      {/* ETAPA 1: APARECE SOMENTE SE 'step' FOR 1      */}
+      {/* ============================================== */}
       {step === 1 && (
         <div className="onboarding-box">
           <h2>Vamos começar?</h2>
@@ -133,7 +132,9 @@ useEffect(() => {
         </div>
       )}
 
-      {/* ETAPA 2 */}
+      {/* ============================================== */}
+      {/* ETAPA 2: APARECE SOMENTE SE 'step' FOR 2      */}
+      {/* ============================================== */}
       {step === 2 && (
         <div className="onboarding-box">
           <h2>Parte 2: O Bem-Estar (o "MindCare")</h2>
@@ -149,7 +150,7 @@ useEffect(() => {
             Muita teoria e pouca prática
           </button>
           
-            {preferencias !== '' && (
+          {preferencias !== '' && (
             <button onClick={proximaEtapa} className="primary-action">
               Gerar minha TrilhaZen!
             </button>
@@ -157,14 +158,15 @@ useEffect(() => {
         </div>
       )}
 
-      {/* ========================================================== */}
-      {/* ETAPA 3 ATUALIZADA */}
-      {/* ========================================================== */}
+      {/* ============================================== */}
+      {/* ETAPA 3: APARECE SOMENTE SE 'step' FOR 3      */}
+      {/* ============================================== */}
       {step === 3 && (
         <div className="dashboard">
           
           {/* Se estiver carregando, mostra "Carregando..." */}
-          {isLoading && <p>Sua TrilhaZen está sendo gerada pela IA...</p>}
+          {/* (No plano de segurança, mudamos o texto) */}
+          {isLoading && <p>Sua TrilhaZen está sendo gerada...</p>}
           
           {/* Se der erro, mostra o erro */}
           {error && <p style={{color: 'red'}}>Erro: {error}</p>}
@@ -175,7 +177,6 @@ useEffect(() => {
               <h1>Sua Trilha: {objetivo}</h1>
               <p>Baseado no seu perfil (que não gosta de {preferencias}), aqui está seu plano:</p>
               
-              {/* Agora lemos a trilha REAL que veio da IA */}
               {trilha.map((mod, index) => (
                 <div className="module" key={index}>
                   <h3>{mod.modulo}</h3>
