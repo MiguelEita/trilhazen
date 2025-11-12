@@ -4,7 +4,7 @@ import MindCarePopup from './MindCarePopup.js';
 
 function App() {
   
-  const [step, setStep] = useState(1); 
+  const [step, setStep] = useState(0); 
   const [objetivo, setObjetivo] = useState('');
   const [preferencias, setPreferencias] = useState('');
   
@@ -28,6 +28,23 @@ function App() {
       return () => clearTimeout(timer);
     }
   }, [step, trilha]);
+
+  // NOVO: Timer da Splash Screen
+// Este useEffect vai rodar APENAS UMA VEZ (note o '[]' no final)
+useEffect(() => {
+
+  // Se estamos na Etapa 0 (Splash)...
+  if (step === 0) {
+
+    // Crie um timer de 2.5 segundos (2500ms)
+    const splashTimer = setTimeout(() => {
+      setStep(1); //...e então pule para a Etapa 1
+    }, 2500); // Duração total da splash
+
+    // Limpa o timer (boa prática)
+    return () => clearTimeout(splashTimer);
+  }
+}, [step]); // Depende do 'step' para rodar (mas só vai pegar o 0)
 
 // ==========================================================
   // !! FUNÇÃO 'proximaEtapa' COM A IA SIMULADA (PLANO DE SEGURANÇA) !!
@@ -84,6 +101,22 @@ function App() {
     <div className="container">
       
       {showPopup && <MindCarePopup onClose={fecharPopup} />}
+
+      <div className="container">
+
+  {/* ============================================== */}
+  {/* !! NOVO !! ETAPA 0: SPLASH SCREEN               */}
+  {/* ============================================== */}
+  {step === 0 && (
+    <div className="splash-screen">
+      <h1 className="splash-logo">TrilhaZen</h1>
+      <p className="splash-tagline">Aprender nunca foi tão tranquilo.</p>
+    </div>
+  )}
+
+  {showPopup && <MindCarePopup onClose={fecharPopup} />}
+
+  {/* ETAPA 1 ... (o resto do seu código continua aqui) */}
       
       {/* ETAPA 1 */}
       {step === 1 && (
