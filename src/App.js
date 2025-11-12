@@ -1,8 +1,5 @@
-// PASSO 1: Importamos 'useState' E 'useEffect'
 import React, { useState, useEffect } from 'react';
 import './App.css';
-
-// PASSO 2: Importamos nosso novo componente de Pop-up
 import MindCarePopup from './MindCarePopup.js';
 
 function App() {
@@ -11,39 +8,74 @@ function App() {
   const [objetivo, setObjetivo] = useState('');
   const [preferencias, setPreferencias] = useState('');
   
-  // PASSO 3: Novo estado para controlar a visibilidade do pop-up
+  // NOVO ESTADO: Para guardar a trilha que a IA vai mandar
+  const [trilha, setTrilha] = useState(null); 
+  
+  // NOVO ESTADO: Para mostrar "Carregando..."
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // NOVO ESTADO: Para mostrar mensagens de erro
+  const [error, setError] = useState(null);
+  
   const [showPopup, setShowPopup] = useState(false);
 
-  // PASSO 4: Usamos o useEffect para criar o "timer"
-  // Este código vai rodar *automaticamente* toda vez que o 'step' mudar
   useEffect(() => {
-    
-    // Se o usuário acabou de chegar no Dashboard (Etapa 3)
-    if (step === 3) {
-      
-      // Criamos um timer para esperar 5 segundos (5000 milissegundos)
+    // O timer do pop-up só deve ligar se a trilha já foi carregada
+    if (step === 3 && trilha) {
       const timer = setTimeout(() => {
-        setShowPopup(true); // Depois de 5s, mostramos o pop-up!
-      }, 5000); // 5000ms = 5 segundos
-
-      // Isso é uma "limpeza": se o usuário sair do dashboard antes dos 5s,
-      // o timer é cancelado. É uma boa prática.
+        setShowPopup(true);
+      }, 5000);
       return () => clearTimeout(timer);
     }
-    
-  }, [step]); // A mágica está aqui: [step] diz ao React "rode isso só quando 'step' mudar"
+  }, [step, trilha]);
 
-
-  function proximaEtapa() {
+// ==========================================================
+  // !! FUNÇÃO 'proximaEtapa' COM A IA SIMULADA (PLANO DE SEGURANÇA) !!
+  // ==========================================================
+  async function proximaEtapa() {
     if (step === 1) {
       setStep(2);
     } 
     else if (step === 2) {
+      // Vai para a Etapa 3 e liga o "Carregando"
       setStep(3);
+      setIsLoading(true);
+      setError(null);
+
+      // --- INÍCIO DA SIMULAÇÃO ---
+      // 1. Estes são os dados "falsos" que vamos mostrar.
+      //    Note que eles ainda usam as variáveis 'objetivo' e 'preferencias'
+      //    para parecer personalizado!
+      const dadosSimulados = {
+        "trilha": [
+          {
+            "modulo": `Módulo 1: Fundamentos (para ${objetivo})`,
+            "aulas": [
+              "Aula de Boas-Vindas",
+              "Exercício Prático de Lógica",
+              "Desafio: Seu Primeiro Projeto"
+            ]
+          },
+          {
+            "modulo": "Módulo 2: Tópicos de Bem-Estar",
+            "aulas": [
+              "Técnica para quando você " + preferencias,
+              "Aula Prática de Respiração",
+              "Projeto Final Simulado"
+            ]
+          }
+        ]
+      };
+
+      // 2. Simula um "delay" de rede de 1.5 segundos (para parecer real)
+      setTimeout(() => {
+        setTrilha(dadosSimulados.trilha); // Define a trilha falsa
+        setIsLoading(false); // Desliga o "Carregando"
+      }, 1500); // 1500ms = 1.5 segundos
+      // --- FIM DA SIMULAÇÃO ---
     }
   }
-
-  // Função que o pop-up vai chamar para se fechar
+  
   function fecharPopup() {
     setShowPopup(false);
   }
@@ -51,9 +83,6 @@ function App() {
   return (
     <div className="container">
       
-      {/* ============================================== */}
-      {/* POP-UP DO MINDCARE (só aparece se 'showPopup' for true) */}
-      {/* ============================================== */}
       {showPopup && <MindCarePopup onClose={fecharPopup} />}
       
       {/* ETAPA 1 */}
@@ -95,24 +124,36 @@ function App() {
         </div>
       )}
 
-      {/* ETAPA 3 */}
+      {/* ========================================================== */}
+      {/* ETAPA 3 ATUALIZADA */}
+      {/* ========================================================== */}
       {step === 3 && (
         <div className="dashboard">
-          <h1>Sua Trilha: {objetivo}</h1>
-          <p>Baseado no seu perfil (que não gosta de {preferencias}), aqui está seu plano:</p>
           
-          <div className="module">
-            <h3>Módulo 1: Fundamentos</h3>
-            <p>[✓] Aula: O que são variáveis</p>
-            <p>[►] Aula: Loops e Condicionais</p>
-            <p>[ ] Exercício: Calculadora simples</p>
-          </div>
+          {/* Se estiver carregando, mostra "Carregando..." */}
+          {isLoading && <p>Sua TrilhaZen está sendo gerada pela IA...</p>}
+          
+          {/* Se der erro, mostra o erro */}
+          {error && <p style={{color: 'red'}}>Erro: {error}</p>}
 
-          <div className="module">
-            <h3>Módulo 2: Próximos Passos</h3>
-            <p>[ ] Aula: Funções e Métodos</p>
-            <p>[ ] Exercício: Jogo da Forca</p>
-          </div>
+          {/* Se a trilha já chegou (e não está carregando nem deu erro) */}
+          {trilha && !isLoading && !error && (
+            <div>
+              <h1>Sua Trilha: {objetivo}</h1>
+              <p>Baseado no seu perfil (que não gosta de {preferencias}), aqui está seu plano:</p>
+              
+              {/* Agora lemos a trilha REAL que veio da IA */}
+              {trilha.map((mod, index) => (
+                <div className="module" key={index}>
+                  <h3>{mod.modulo}</h3>
+                  {mod.aulas.map((aula, i) => (
+                    <p key={i}>[ ] {aula}</p>
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
+
         </div>
       )}
 
