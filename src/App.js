@@ -116,8 +116,8 @@ function App() {
             Muita teoria e pouca prática
           </button>
           
-          {preferencias !== '' && (
-            <button onClick={proximaEtapa} style={{backgroundColor: '#28a745'}}>
+            {preferencias !== '' && (
+            <button onClick={proximaEtapa} className="primary-action">
               Gerar minha TrilhaZen!
             </button>
           )}
