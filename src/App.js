@@ -47,49 +47,52 @@ useEffect(() => {
 }, [step]); // Depende do 'step' para rodar (mas só vai pegar o 0)
 
 // ==========================================================
-  // !! FUNÇÃO 'proximaEtapa' COM A IA SIMULADA (PLANO DE SEGURANÇA) !!
+  // !! FUNÇÃO 'proximaEtapa' (VERSÃO IA REAL - CORRIGIDA) !!
   // ==========================================================
   async function proximaEtapa() {
     if (step === 1) {
       setStep(2);
     } 
     else if (step === 2) {
-      // Vai para a Etapa 3 e liga o "Carregando"
+      // Começa a Etapa 3: Mostrar "Carregando"
       setStep(3);
-      setIsLoading(true);
-      setError(null);
+      setIsLoading(true); // Liga o loading
+      setError(null);     // Limpa erros antigos
 
-      // --- INÍCIO DA SIMULAÇÃO ---
-      // 1. Estes são os dados "falsos" que vamos mostrar.
-      //    Note que eles ainda usam as variáveis 'objetivo' e 'preferencias'
-      //    para parecer personalizado!
-      const dadosSimulados = {
-        "trilha": [
-          {
-            "modulo": `Módulo 1: Fundamentos (para ${objetivo})`,
-            "aulas": [
-              "Aula de Boas-Vindas",
-              "Exercício Prático de Lógica",
-              "Desafio: Seu Primeiro Projeto"
-            ]
+      try {
+        // 1. Chamar nossa API de back-end LOCAL!
+          const response = await fetch('https://trilhazen-api.onrender.com/gerar-trilha', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
           },
-          {
-            "modulo": "Módulo 2: Tópicos de Bem-Estar",
-            "aulas": [
-              "Técnica para quando você " + preferencias,
-              "Aula Prática de Respiração",
-              "Projeto Final Simulado"
-            ]
-          }
-        ]
-      };
+          body: JSON.stringify({ // Envia os dados para a IA
+            objetivo: objetivo,
+            preferencias: preferencias,
+          }),
+        });
 
-      // 2. Simula um "delay" de rede de 1.5 segundos (para parecer real)
-      setTimeout(() => {
-        setTrilha(dadosSimulados.trilha); // Define a trilha falsa
-        setIsLoading(false); // Desliga o "Carregando"
-      }, 1500); // 1500ms = 1.5 segundos
-      // --- FIM DA SIMULAÇÃO ---
+        if (!response.ok) {
+          // Se a API falhar (ex: 500), joga um erro
+          throw new Error('Erro ao buscar dados da API');
+        }
+
+        // 2. Recebe o JSON da IA
+        const data = await response.json(); 
+        
+        // 3. Salva a trilha no nosso "estado"
+        setTrilha(data.trilha); // 'data.trilha' vem da estrutura do JSON
+
+      } catch (err) {
+        // 4. Se der erro, salva a mensagem de erro
+        setError(err.message);
+      } finally {
+        // 5. Independente de sucesso ou erro, desliga o "Carregando"
+        setIsLoading(false);
+      }
+      
+      // !! A PARTE QUE CAUSAVA O ERRO FOI REMOVIDA DAQUI !!
+      // (Não há mais 'setTimeout' ou 'dadosSimulados' aqui)
     }
   }
   
