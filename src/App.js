@@ -247,9 +247,9 @@ function App() {
             type="text" 
             placeholder="Ex: Aprender Python para Análise de Dados"
             value={objetivo}
-            onChange={(e) => setObjetivo(e.targe.value)}
+            onChange={(e) => setObjetivo(e.target.value)}
           />
-          <button onClick={proximaEtapa}>Prximo</button>
+          <button onClick={proximaEtapa}>Próximo</button>
         </div>
       )}
 
