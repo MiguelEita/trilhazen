@@ -36,7 +36,7 @@ function App() {
   // !! "OUVINTES" (useEffect)
   // ==========================================================
 
-  // "Ouvinte" de Autenticação (Chama a IA REAL)
+  // "Ouvinte" de Autenticação (Carrega a trilha salva)
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
@@ -50,14 +50,21 @@ function App() {
           const objetivoSalvo = docSnap.data().objetivoAtual;
           const preferenciasSalvas = docSnap.data().preferencias || ''; 
           
+          // Carrega a trilha JÁ SALVA do banco de dados
+          const trilhaSalva = docSnap.data().trilhaSalva || null;
+
           setObjetivo(objetivoSalvo);
           setPreferencias(preferenciasSalvas);
-
-          // <-- MUDANÇA IMPORTANTE!
-          // Chama a função da IA REAL
-          fetchTrilhaReal(objetivoSalvo, preferenciasSalvas);
           
-          setStep(3); // PULA DIRETO PARA O DASHBOARD!
+          if (trilhaSalva) {
+            // Se a trilha existe no DB, usa ela!
+            setTrilha(trilhaSalva);
+            setStep(3); // PULA DIRETO PARA O DASHBOARD!
+          } else {
+            // Se a trilha não foi gerada ainda (ex: bug antigo), força a Etapa 2
+            setStep(2); 
+          }
+
         } else {
           // Se não tem objetivo salvo, começa o onboarding
           setStep(0); // Começa na Splash Screen
@@ -78,8 +85,11 @@ function App() {
   // "Ouvinte" do Progresso (Firestore)
   useEffect(() => {
     if (user && objetivo) {
-      const docPath = `progresso/${user.uid}/trilhas/${objetivo}`;
+      // Remove caracteres ilegais para o Firestore
+      const safeObjective = objetivo.replace(/[^a-zA-Z0-9]/g, '_');
+      const docPath = `progresso/${user.uid}/trilhas/${safeObjective}`;
       const docRef = doc(db, docPath);
+
       const unsubscribe = onSnapshot(docRef, (docSnap) => {
         if (docSnap.exists()) {
           setProgresso(docSnap.data().aulas || {});
@@ -89,10 +99,10 @@ function App() {
       });
       return () => unsubscribe();
     }
-  }, [user, objetivo]);
+  }, [user, objetivo]); // Depende do 'user' e 'objetivo'
 
 
-  // Timers da Splash e MindCare (sem mudanças)
+  // Timers da Splash e MindCare
   useEffect(() => {
     if (step === 3 && trilha) {
       const timer = setTimeout(() => { setShowPopup(true); }, 5000);
@@ -101,6 +111,7 @@ function App() {
   }, [step, trilha]);
 
   useEffect(() => {
+    // Só roda a splash se o usuário NÃO pulou direto pro dashboard
     if (step === 0 && !authLoading) { 
       const splashTimer = setTimeout(() => { setStep(1); }, 2500);
       return () => clearTimeout(splashTimer);
@@ -110,39 +121,9 @@ function App() {
   // ==========================================================
   // !! FUNÇÕES PRINCIPAIS
   // ==========================================================
-
-  // <-- NOVO! Esta é a ÚNICA função que gera a trilha
-  // Ela chama a API real no Render.com
-  const fetchTrilhaReal = async (obj, pref) => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch('https://trilhazen-api.onrender.com/gerar-trilha', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          objetivo: obj,
-          preferencias: pref,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Erro ao buscar dados da API. O servidor pode estar "acordando" (cold start).');
-      }
-
-      const data = await response.json(); 
-      setTrilha(data.trilha); // Salva a trilha real
-
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
   
 
-  // 'proximaEtapa' (MODIFICADA para chamar a IA REAL)
+  // 'proximaEtapa' (Gera a IA REAL e Salva no DB)
   async function proximaEtapa() {
     if (step === 1) {
       // Salva o objetivo
@@ -156,24 +137,45 @@ function App() {
       }
     } 
     else if (step === 2) {
-      // Salva as preferências
+      // Salva as preferências e GERA A TRILHA (SÓ UMA VEZ!)
+      setStep(3);
+      setIsLoading(true);
+      setError(null);
+      setProgresso({}); // Reseta o progresso para a nova trilha
+
       try {
+        // Salva as preferências
         const userDocRef = doc(db, "usuarios", user.uid);
         await setDoc(userDocRef, { preferencias: preferencias }, { merge: true });
 
+        // 1. Chamar nossa API ONLINE NO RENDER!
+        const response = await fetch('https://trilhazen-api.onrender.com/gerar-trilha', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            objetivo: objetivo,
+            preferencias: preferencias,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Erro ao buscar dados da API. O servidor do Render pode estar "acordando". Tente novamente em 30s.');
+        }
+
+        const data = await response.json(); 
+        setTrilha(data.trilha); // Salva a trilha no ESTADO
+
         // <-- MUDANÇA IMPORTANTE!
-        // Chama a função da IA REAL
-        fetchTrilhaReal(objetivo, preferencias);
-        
-        setStep(3);
-        setProgresso({}); // Reseta o progresso para a nova trilha
-      } catch (error) {
-        console.error("Erro ao salvar preferências: ", error);
+        // Salva a trilha GERADA no banco de dados!
+        await setDoc(userDocRef, { trilhaSalva: data.trilha }, { merge: true });
+
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
       }
     }
   }
-
-  // (O resto das funções handleLogout, handleAulaClick, etc. continuam iguais)
 
   function fecharPopup() {
     setShowPopup(false);
@@ -182,6 +184,7 @@ function App() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
+      // O "ouvinte" lá em cima vai cuidar de resetar os estados
       setTrilha(null);
       setObjetivo('');
       setPreferencias('');
@@ -197,7 +200,9 @@ function App() {
     setProgresso(novoProgresso);
 
     try {
-      const docPath = `progresso/${user.uid}/trilhas/${objetivo}`;
+      // Remove caracteres ilegais para o Firestore
+      const safeObjective = objetivo.replace(/[^a-zA-Z0-9]/g, '_');
+      const docPath = `progresso/${user.uid}/trilhas/${safeObjective}`;
       const docRef = doc(db, docPath);
       await setDoc(docRef, { aulas: novoProgresso });
     } catch (error) {
@@ -242,9 +247,9 @@ function App() {
             type="text" 
             placeholder="Ex: Aprender Python para Análise de Dados"
             value={objetivo}
-            onChange={(e) => setObjetivo(e.target.value)}
+            onChange={(e) => setObjetivo(e.targe.value)}
           />
-          <button onClick={proximaEtapa}>Próximo</button>
+          <button onClick={proximaEtapa}>Prximo</button>
         </div>
       )}
 
