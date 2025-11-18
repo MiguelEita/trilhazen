@@ -11,7 +11,6 @@ import LoginPage from './LoginPage.js';
 // Importações do Firebase
 import { auth, db } from './firebaseConfig.js'; 
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-// <-- NOVO! Importamos 'getDoc' para LER um documento SÓ UMA VEZ
 import { doc, setDoc, onSnapshot, getDoc } from "firebase/firestore"; 
 
 // ==========================================================
@@ -37,31 +36,26 @@ function App() {
   // !! "OUVINTES" (useEffect)
   // ==========================================================
 
-// "Ouvinte" de Autenticação (CORRIGIDO)
+  // "Ouvinte" de Autenticação (Chama a IA REAL)
   useEffect(() => {
-    // onAuthStateChanged é o "ouvinte" do Firebase.
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         // Usuário está logado
         setUser(currentUser);
-        
-        // Vamos buscar o 'objetivo' salvo dele
         const userDocRef = doc(db, "usuarios", currentUser.uid);
         const docSnap = await getDoc(userDocRef);
 
         if (docSnap.exists() && docSnap.data().objetivoAtual) {
           // Se ele TEM um objetivo salvo...
           const objetivoSalvo = docSnap.data().objetivoAtual;
-          
-          // <-- A CORREÇÃO ESTÁ AQUI:
-          // Pega a preferência salva do banco de dados
           const preferenciasSalvas = docSnap.data().preferencias || ''; 
           
-          setObjetivo(objetivoSalvo); // Carrega o objetivo
-          setPreferencias(preferenciasSalvas); // <-- E CARREGA A PREFERÊNCIA!
+          setObjetivo(objetivoSalvo);
+          setPreferencias(preferenciasSalvas);
 
-          // Gera a trilha (simulada) para esse objetivo
-          gerarTrilhaSimulada(objetivoSalvo, preferenciasSalvas);
+          // <-- MUDANÇA IMPORTANTE!
+          // Chama a função da IA REAL
+          fetchTrilhaReal(objetivoSalvo, preferenciasSalvas);
           
           setStep(3); // PULA DIRETO PARA O DASHBOARD!
         } else {
@@ -78,16 +72,14 @@ function App() {
       }
     });
     return () => unsubscribe();
-  }, []); // O '[]' vazio faz isso rodar só UMA VEZ no início
+  }, []); // '[]' Vazio. Roda só uma vez.
 
   
   // "Ouvinte" do Progresso (Firestore)
-  // (Este está como antes, mas agora depende do 'objetivo' ser carregado primeiro)
   useEffect(() => {
     if (user && objetivo) {
       const docPath = `progresso/${user.uid}/trilhas/${objetivo}`;
       const docRef = doc(db, docPath);
-
       const unsubscribe = onSnapshot(docRef, (docSnap) => {
         if (docSnap.exists()) {
           setProgresso(docSnap.data().aulas || {});
@@ -97,7 +89,7 @@ function App() {
       });
       return () => unsubscribe();
     }
-  }, [user, objetivo]); // Depende do 'user' e 'objetivo'
+  }, [user, objetivo]);
 
 
   // Timers da Splash e MindCare (sem mudanças)
@@ -109,7 +101,6 @@ function App() {
   }, [step, trilha]);
 
   useEffect(() => {
-    // Só roda a splash se o usuário NÃO pulou direto pro dashboard
     if (step === 0 && !authLoading) { 
       const splashTimer = setTimeout(() => { setStep(1); }, 2500);
       return () => clearTimeout(splashTimer);
@@ -120,62 +111,24 @@ function App() {
   // !! FUNÇÕES PRINCIPAIS
   // ==========================================================
 
-  // <-- NOVO! Função para gerar a trilha (separada)
-  const gerarTrilhaSimulada = (obj, pref) => {
-    setIsLoading(true);
-    const dadosSimulados = {
-      "trilha": [
-        {"modulo": `Módulo 1: Fundamentos (para ${obj})`, "aulas": ["Aula de Boas-Vindas", "Exercício Prático de Lógica", "Desafio: Seu Primeiro Projeto"]},
-        {"modulo": "Módulo 2: Tópicos de Bem-Estar", "aulas": ["Técnica para quando você " + pref, "Aula Prática de Respiração", "Projeto Final Simulado"]}
-      ]
-    };
-    
-    // Simula o tempo de carregamento
-    setTimeout(() => {
-      setTrilha(dadosSimulados.trilha);
-      setIsLoading(false);
-    }, 1000); // 1 segundo
-  };
-  
-
-// ==========================================================
-// !! FUNÇÃO 'proximaEtapa' (VERSÃO IA REAL - ONLINE) !!
-// ==========================================================
-async function proximaEtapa() {
-  if (step === 1) {
-    // Salva o objetivo
-    try {
-      const userDocRef = doc(db, "usuarios", user.uid);
-      await setDoc(userDocRef, { objetivoAtual: objetivo }, { merge: true });
-      setStep(2);
-    } catch (error) {
-      console.error("Erro ao salvar objetivo: ", error);
-      setError("Não foi possível salvar seu objetivo.");
-    }
-  } 
-  else if (step === 2) {
-    // Salva as preferências e GERA A TRILHA
-    setStep(3);
+  // <-- NOVO! Esta é a ÚNICA função que gera a trilha
+  // Ela chama a API real no Render.com
+  const fetchTrilhaReal = async (obj, pref) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      // Salva as preferências
-      const userDocRef = doc(db, "usuarios", user.uid);
-      await setDoc(userDocRef, { preferencias: preferencias }, { merge: true });
-
-      // 1. Chamar nossa API ONLINE NO RENDER!
       const response = await fetch('https://trilhazen-api.onrender.com/gerar-trilha', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          objetivo: objetivo,
-          preferencias: preferencias,
+          objetivo: obj,
+          preferencias: pref,
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Erro ao buscar dados da API');
+        throw new Error('Erro ao buscar dados da API. O servidor pode estar "acordando" (cold start).');
       }
 
       const data = await response.json(); 
@@ -186,8 +139,41 @@ async function proximaEtapa() {
     } finally {
       setIsLoading(false);
     }
+  };
+  
+
+  // 'proximaEtapa' (MODIFICADA para chamar a IA REAL)
+  async function proximaEtapa() {
+    if (step === 1) {
+      // Salva o objetivo
+      try {
+        const userDocRef = doc(db, "usuarios", user.uid);
+        await setDoc(userDocRef, { objetivoAtual: objetivo }, { merge: true });
+        setStep(2);
+      } catch (error) {
+        console.error("Erro ao salvar objetivo: ", error);
+        setError("Não foi possível salvar seu objetivo.");
+      }
+    } 
+    else if (step === 2) {
+      // Salva as preferências
+      try {
+        const userDocRef = doc(db, "usuarios", user.uid);
+        await setDoc(userDocRef, { preferencias: preferencias }, { merge: true });
+
+        // <-- MUDANÇA IMPORTANTE!
+        // Chama a função da IA REAL
+        fetchTrilhaReal(objetivo, preferencias);
+        
+        setStep(3);
+        setProgresso({}); // Reseta o progresso para a nova trilha
+      } catch (error) {
+        console.error("Erro ao salvar preferências: ", error);
+      }
+    }
   }
-}
+
+  // (O resto das funções handleLogout, handleAulaClick, etc. continuam iguais)
 
   function fecharPopup() {
     setShowPopup(false);
@@ -196,7 +182,6 @@ async function proximaEtapa() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      // O "ouvinte" lá em cima vai cuidar de resetar os estados
       setTrilha(null);
       setObjetivo('');
       setPreferencias('');
@@ -206,7 +191,6 @@ async function proximaEtapa() {
     }
   };
 
-  // Salvar Progresso (como antes)
   const handleAulaClick = async (nomeDaAula) => {
     const novoProgresso = { ...progresso };
     novoProgresso[nomeDaAula] = !novoProgresso[nomeDaAula];
@@ -307,15 +291,11 @@ async function proximaEtapa() {
               ))}
             </div>
           )}
-
-      {/* ============================================== */}
-      {/* !! O CÓDIGO DA CÁPSULA VAI AQUI !!          */}
-      {/* (Nós o colocamos dentro da mesma verificação 'trilha && ...' 
-          para que ele apareça junto com a trilha) */}
-      {/* ============================================== */}
-      {trilha && !isLoading && !error && (
-        <CapsulaDoTempo />
-      )}
+          
+          {/* A Cápsula do Tempo */}
+          {trilha && !isLoading && !error && (
+            <CapsulaDoTempo />
+          )}
 
         </div>
       )}
