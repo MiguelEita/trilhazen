@@ -1,0 +1,43 @@
+/* O contêiner de cada aula individual */
+.aula-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 10px 8px;
+  margin: 4px 0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Efeito de hover para mostrar que é clicável */
+.aula-item:hover {
+  background-color: #374151; /* Cinza-escuro (do nosso tema) */
+}
+
+/* O ícone de checkbox [ ] ou [✓] */
+.checkbox-icon {
+  margin-right: 12px;
+  font-weight: 700;
+  font-family: monospace; /* Deixa o [ ] mais bonito */
+  font-size: 16px;
+}
+
+/* O nome da aula */
+.aula-nome {
+  color: #d1d5db; /* Cinza-claro (do nosso tema) */
+  flex: 1; /* <-- ADICIONE ISTO (diz "ocupe o resto do espaço") */
+  word-break: break-word; /* <-- ADICIONE ISTO (força a quebra da linha) */
+}
+
+
+/* --- A MÁGICA QUANDO É CLICADO --- */
+
+/* Estilo que é aplicado quando a aula tem a classe 'concluida' */
+.aula-item.concluida .aula-nome {
+  text-decoration: line-through; /* Risca o texto */
+  color: #4b5563; /* Deixa o texto cinza e apagado */
+}
+
+.aula-item.concluida .checkbox-icon {
+  color: #22c55e; /* Deixa o [✓] verde! */
+}

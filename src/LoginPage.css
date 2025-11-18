@@ -1,0 +1,65 @@
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  /* Usa o mesmo fundo dark do app */
+  background-color: #111827; 
+}
+
+.login-box {
+  background-color: #1f2937; /* Cinza-escuro */
+  border-radius: 12px;
+  padding: 40px 50px;
+  text-align: center;
+  border: 1px solid #374151;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+}
+
+.login-logo {
+  font-size: 42px;
+  font-weight: 700;
+  color: #a5b4fc; /* Roxo-claro (do tema) */
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.login-tagline {
+  color: #d1d5db; /* Cinza-claro */
+  font-size: 18px;
+  margin-top: 10px;
+  margin-bottom: 30px;
+}
+
+.google-login-button {
+  display: flex; /* Alinha o logo e o texto */
+  align-items: center;
+  justify-content: center;
+  
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  color: #333; /* Texto escuro */
+  
+  background-color: #ffffff; /* Fundo branco */
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.google-login-button:hover {
+  background-color: #f9f9f9;
+  border-color: #aaa;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.google-login-button img {
+  width: 20px;
+  height: 20px;
+  margin-right: 12px;
+}

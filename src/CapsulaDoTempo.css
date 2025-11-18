@@ -1,0 +1,93 @@
+/* O contêiner principal da cápsula */
+.capsula-container {
+  /* Usa o mesmo estilo dos módulos da trilha */
+  margin-top: 25px;
+  border: 1px solid #374151;
+  padding: 20px 25px;
+  border-radius: 8px;
+  background-color: #111827; /* Fundo mais escuro */
+  text-align: left;
+}
+
+.capsula-container h3 {
+  margin-top: 0;
+  color: #a5b4fc; /* Título roxo-claro */
+  border-bottom: 1px solid #374151;
+  padding-bottom: 10px;
+}
+
+.capsula-container p {
+  color: #d1d5db;
+  font-size: 15px;
+}
+
+/* Estilos do formulário */
+.capsula-container textarea {
+  width: 95%;
+  min-height: 80px;
+  padding: 10px;
+  margin-top: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  
+  /* Estilos do Dark Mode */
+  background-color: #374151;
+  color: #f9fafb;
+  border: 1px solid #4b5563;
+  border-radius: 8px;
+  resize: vertical; /* Permite ao usuário aumentar a altura */
+}
+
+.capsula-container label {
+  display: block;
+  margin-top: 15px;
+  font-weight: 500;
+  color: #f9fafb;
+}
+
+.capsula-container input[type="date"] {
+  width: 95%;
+  padding: 10px;
+  margin-top: 5px;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  background-color: #374151;
+  color: #f9fafb;
+  border: 1px solid #4b5563;
+  border-radius: 8px;
+}
+
+/* Hack para o ícone de calendário no Chrome/Edge */
+.capsula-container input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+/* Botão de salvar (usa o mesmo estilo roxo) */
+.capsula-container .primary-action {
+  width: 100%;
+  margin-top: 20px;
+}
+
+/* Estilos para a cápsula TRANCADA */
+.capsula-trancada h3 {
+  color: #f59e0b; /* Amarelo/Laranja */
+}
+.capsula-trancada strong {
+  display: block;
+  font-size: 20px;
+  color: #f9fafb;
+  margin-top: 10px;
+}
+
+/* Estilos para a cápsula ABERTA */
+.capsula-aberta h3 {
+  color: #22c55e; /* Verde */
+}
+.capsula-aberta blockquote {
+  font-size: 1.1em;
+  font-style: italic;
+  color: #f9fafb;
+  margin: 10px 0 0 0;
+  padding-left: 15px;
+  border-left: 3px solid #6d28d9; /* Borda roxa */
+}

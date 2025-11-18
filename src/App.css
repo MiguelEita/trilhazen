@@ -214,3 +214,24 @@ button:hover {
     transform: translateY(-5px); /* Sobe um pouco ao sumir */
   }
 }
+.logout-button {
+  /* Posiciona o botão no canto superior direito */
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  
+  /* Estilo pequeno e sutil */
+  width: auto; /* Largura automática */
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  background-color: #374151; /* Cinza */
+  color: #f9fafb;
+  border: 1px solid #4b5563;
+}
+
+.logout-button:hover {
+  background-color: #4b5563;
+  transform: none; /* Remove o efeito de levantar */
+  box-shadow: none;
+}
