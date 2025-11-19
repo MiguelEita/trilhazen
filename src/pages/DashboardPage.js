@@ -1,25 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { auth, db } from '../firebaseConfig'; // Ajusta o caminho
-import { doc, getDoc, onSnapshot } from "firebase/firestore";
-import { useOutletContext } from 'react-router-dom'; // Hook para receber dados do "pai"
+import { auth, db } from '../firebaseConfig';
+// AQUI ESTAVA O ERRO: Adicionei 'setDoc' à lista de importações
+import { doc, getDoc, onSnapshot, setDoc } from "firebase/firestore";
+import { useOutletContext } from 'react-router-dom';
 
-// Importa os componentes
 import Aula from '../Aula';
 import MindCarePopup from '../MindCarePopup';
 import CapsulaDoTempo from '../CapsulaDoTempo';
 
-// Página principal que mostra a trilha e a cápsula
 function DashboardPage() {
   
-  // Pega os dados do usuário e o objetivo que o "pai" (Layout.js) nos passou
   const { user, objetivo, preferencias, trilha } = useOutletContext();
   
   const [progresso, setProgresso] = useState({});
   const [showPopup, setShowPopup] = useState(false);
-  const [isLoading, setIsLoading] = useState(false); // Embora a trilha venha pronta, guardamos para futuros re-loads
-  const [error, setError] = useState(null);
-
-  // "Ouvinte" do Progresso (Firestore)
+  
+  // Ouvinte do Progresso
   useEffect(() => {
     if (user && objetivo) {
       const safeObjective = objetivo.replace(/[^a-zA-Z0-9]/g, '_');
@@ -37,9 +33,8 @@ function DashboardPage() {
     }
   }, [user, objetivo]);
 
-  // Timer do MindCare Popup
   useEffect(() => {
-    if (trilha) { // Se a trilha existe
+    if (trilha) {
       const timer = setTimeout(() => { setShowPopup(true); }, 5000);
       return () => clearTimeout(timer);
     }
@@ -49,7 +44,6 @@ function DashboardPage() {
     setShowPopup(false);
   }
 
-  // Função para salvar o progresso (igual à do App.js antigo)
   const handleAulaClick = async (nomeDaAula) => {
     const novoProgresso = { ...progresso };
     novoProgresso[nomeDaAula] = !novoProgresso[nomeDaAula];
@@ -65,35 +59,19 @@ function DashboardPage() {
     }
   };
 
-
-  // --- Renderização ---
-  
-  if (isLoading) {
-    return <div className="dashboard"><p>Carregando sua trilha...</p></div>;
-  }
-  
-  if (error) {
-     return <div className="dashboard"><p style={{color: 'red'}}>{error}</p></div>;
-  }
-
-  // Se não tem trilha (acontece se o usuário burlar o sistema)
   if (!trilha) {
     return (
       <div className="dashboard">
         <h1>Bem-vindo!</h1>
         <p>Você ainda não tem uma trilha ativa. Por favor, crie uma nova trilha.</p>
-        {/* Futuramente, podemos adicionar um botão <Link to="/nova">Criar Trilha</Link> aqui */}
       </div>
     );
   }
 
-  // Renderização principal (Dashboard)
   return (
     <div className="dashboard">
-      {/* Pop-up do MindCare */}
       {showPopup && <MindCarePopup onClose={fecharPopup} />}
 
-      {/* Bloco da Trilha */}
       <div>
         <h1>Sua Trilha: {objetivo}</h1>
         <p>Baseado no seu perfil (que não gosta de {preferencias}), aqui está seu plano:</p>
@@ -113,7 +91,6 @@ function DashboardPage() {
         ))}
       </div>
       
-      {/* Bloco da Cápsula do Tempo */}
       <CapsulaDoTempo />
       
     </div>
