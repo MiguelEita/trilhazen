@@ -1,0 +1,67 @@
+.mood-tracker-container {
+  background-color: #1f2937; /* Cinza escuro */
+  border: 1px solid #374151;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 30px; /* Espaço abaixo dele */
+  text-align: center;
+}
+
+.mood-tracker-container h3 {
+  color: #f9fafb;
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.mood-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.mood-btn {
+  background-color: #374151;
+  border: 1px solid #4b5563;
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 70px;
+}
+
+.mood-btn:hover {
+  background-color: #4b5563;
+  transform: translateY(-2px);
+}
+
+.mood-btn.selected {
+  background-color: #4f46e5; /* Roxo/Azul destaque */
+  border-color: #6366f1;
+  transform: scale(1.05);
+}
+
+.mood-emoji {
+  font-size: 24px;
+  margin-bottom: 5px;
+}
+
+.mood-label {
+  font-size: 12px;
+  color: #d1d5db;
+}
+
+.mood-saved-message {
+  color: #22c55e; /* Verde */
+  font-weight: 500;
+  animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

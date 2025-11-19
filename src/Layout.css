@@ -1,4 +1,5 @@
-/* --- RESET GLOBAL PARA EVITAR ERROS DE TAMANHO --- */
+/* --- RESET GLOBAL --- */
+/* Garante que bordas e padding não aumentam o tamanho dos elementos */
 * {
   box-sizing: border-box;
 }
@@ -7,13 +8,19 @@
 .app-layout {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  /* Força a aplicação a ter exatamente a altura da janela */
+  height: 100vh; 
+  /* Impede barras de rolagem na janela principal */
+  overflow: hidden; 
 }
 
 .app-content {
   flex: 1;
-  padding-bottom: 80px; /* Espaço extra para o rodapé */
   background-color: #111827;
+  /* O scroll acontece APENAS aqui dentro */
+  overflow-y: auto; 
+  /* Espaço extra no fundo para o conteúdo não ficar tapado pelo menu no telemóvel */
+  padding-bottom: 90px; 
 }
 
 /* --- NAVEGAÇÃO MOBILE (Rodapé Fixo) --- */
@@ -22,7 +29,7 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 75px; 
+  height: 75px;
   
   background-color: #1f2937;
   border-top: 1px solid #374151;
@@ -32,8 +39,8 @@
   align-items: center;
   z-index: 100;
   
-  /* Ajustes para garantir que cabe tudo e respeita áreas seguras do iPhone */
   padding-top: 5px;
+  /* Garante que não fica colado ao fundo em iPhones sem botão home */
   padding-bottom: max(10px, env(safe-area-inset-bottom)); 
 }
 
@@ -52,7 +59,8 @@
   padding: 4px 8px;
   border-radius: 8px;
   transition: all 0.2s ease;
-  flex: 1;
+  /* No mobile, cada botão ocupa o mesmo espaço */
+  flex: 1; 
 }
 
 /* Ícone */
@@ -68,7 +76,7 @@
   line-height: 1;
 }
 
-/* Estados */
+/* Estados (Ativo / Hover) */
 .nav-link.active, .nav-link:hover {
   color: #a5b4fc;
 }
@@ -90,20 +98,21 @@
 @media (min-width: 768px) {
   
   .app-layout {
-    flex-direction: row;
+    flex-direction: row; /* Sidebar à esquerda, Conteúdo à direita */
   }
 
   .app-content {
     padding-bottom: 0;
-    padding-left: 260px;
+    padding-left: 0; /* Remove padding porque agora usamos flexbox */
+    flex: 1; /* Ocupa todo o espaço restante */
+    padding: 20px;
   }
   
+  /* Barra Lateral */
   .app-nav {
-    position: fixed;
-    left: 0;
-    top: 0;
+    position: relative; /* É parte do layout, não flutua */
     width: 240px;
-    height: 100vh; /* Altura total */
+    height: 100%; /* Ocupa toda a altura disponível */
     
     border-top: none;
     border-right: 1px solid #374151;
@@ -112,13 +121,12 @@
     justify-content: flex-start;
     align-items: stretch;
     
-    /* Padding ajustado: Mais espaço em baixo para o botão Sair não colar */
     padding: 30px 15px;
-    padding-bottom: 40px; /* Aumentei para garantir visibilidade */
+    padding-bottom: 20px;
   }
 
   .nav-link {
-    flex-direction: row;
+    flex-direction: row; /* Ícone ao lado do texto */
     justify-content: flex-start;
     flex: 0;
     width: 100%;
@@ -142,8 +150,8 @@
     color: #a5b4fc;
   }
 
-  /* O botão Sair fica no fundo, mas agora com o padding-bottom de 40px, vai subir */
+  /* MÁGICA: Empurra o botão "Sair" para o fundo da barra lateral */
   .nav-logout {
-    margin-top: auto;
+    margin-top: auto; 
   }
 }

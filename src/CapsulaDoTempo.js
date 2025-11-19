@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './CapsulaDoTempo.css'; // Vamos criar este arquivo
+import './CapsulaDoTempo.css';
 
 // Importa o 'db' e o 'auth' do nosso arquivo de configuração
 import { db, auth } from './firebaseConfig';
@@ -20,19 +20,16 @@ function CapsulaDoTempo() {
   const docRef = doc(db, 'capsulas', userId);
 
   // --- Efeito de Leitura (Read) ---
-  // Roda UMA VEZ quando o componente é carregado
   useEffect(() => {
     const carregarCapsula = async () => {
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        // Se o usuário JÁ TEM uma cápsula salva...
         setCapsulaSalva(docSnap.data());
       }
       setLoading(false);
     };
 
     carregarCapsula();
-    // O '[]' vazio faz isso rodar só uma vez
   }, [docRef]);
 
   // --- Função de Escrita (Write) ---
@@ -45,22 +42,30 @@ function CapsulaDoTempo() {
     const novaCapsula = {
       mensagem: mensagem,
       dataAbertura: dataAbertura, // Salva a data no formato YYYY-MM-DD
-      criadaEm: new Date() // Salva a data de hoje
+      criadaEm: new Date().toISOString() // Salva a data de hoje como string
     };
 
     try {
       // Salva o documento no Firestore
       await setDoc(docRef, novaCapsula);
       setCapsulaSalva(novaCapsula); // Atualiza o estado local
+      setMensagem(''); // Limpa o campo de texto
+      setDataAbertura(''); // Limpa a data
     } catch (error) {
       console.error("Erro ao salvar cápsula: ", error);
       alert("Falha ao salvar. Tente novamente.");
     }
   };
 
+  // --- Função para "Resetar" e criar nova ---
+  const handleNovaCapsula = () => {
+    // Simplesmente limpamos o estado da cápsula salva.
+    // Isso fará o componente renderizar o formulário novamente.
+    setCapsulaSalva(null);
+  };
+
   // --- Lógica de Renderização ---
 
-  // Se estiver carregando, mostra um aviso
   if (loading) {
     return <div className="capsula-container">Carregando Cápsula...</div>;
   }
@@ -75,7 +80,7 @@ function CapsulaDoTempo() {
       // A cápsula AINDA ESTÁ TRANCADA
       return (
         <div className="capsula-container capsula-trancada">
-          <h3>Sua Cápsula do Tempo está Trancada</h3>
+          <h3>Sua Cápsula do Tempo está Trancada 🔒</h3>
           <p>Você poderá ler sua mensagem no dia:</p>
           <strong>{new Date(dataAberturaSalva).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</strong>
         </div>
@@ -84,18 +89,25 @@ function CapsulaDoTempo() {
       // A cápsula ESTÁ ABERTA!
       return (
         <div className="capsula-container capsula-aberta">
-          <h3>Sua Cápsula do Tempo foi Aberta!</h3>
-          <p>Em {new Date(capsulaSalva.criadaEm.toDate()).toLocaleDateString('pt-BR')}, você escreveu:</p>
+          <h3>Sua Cápsula do Tempo foi Aberta! 🎉</h3>
+          <p>Você escreveu:</p>
           <blockquote>"{capsulaSalva.mensagem}"</blockquote>
+          
+          <hr style={{borderColor: '#374151', margin: '20px 0'}} />
+          
+          <p style={{fontSize: '14px', marginBottom: '10px'}}>Quer enviar outra mensagem para o futuro?</p>
+          <button onClick={handleNovaCapsula} className="primary-action">
+            Criar Nova Cápsula
+          </button>
         </div>
       );
     }
   }
 
-  // Se NÃO EXISTE uma cápsula salva, mostra o formulário de criação
+  // Se NÃO EXISTE uma cápsula salva (ou o usuário clicou em "Criar Nova"), mostra o formulário
   return (
     <div className="capsula-container">
-      <h3>Cápsula do Tempo</h3>
+      <h3>Cápsula do Tempo ⏳</h3>
       <p>Escreva uma mensagem para o seu "eu do futuro". Ela ficará trancada até a data que você escolher.</p>
       
       <textarea
