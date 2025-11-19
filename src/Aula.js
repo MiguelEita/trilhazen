@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import './Aula.css';
-import VideoAula from './components/VideoAula'; // Ajusta o caminho se necessário
+// Importa o componente que exibe o vídeo
+import VideoAula from './components/VideoAula'; 
 
 function Aula({ nome, video, concluido, onAulaClick }) {
+  // Estado para controlar se o vídeo está visível ou escondido
   const [mostrarVideo, setMostrarVideo] = useState(false);
 
   return (
@@ -14,11 +16,12 @@ function Aula({ nome, video, concluido, onAulaClick }) {
         <span className="checkbox-icon">{concluido ? '[✓]' : '[ ]'}</span>
         <span className="aula-nome">{nome}</span>
         
+        {/* Só mostra o botão se houver um vídeo disponível */}
         {video && (
           <button 
             className="btn-ver-video"
             onClick={(e) => {
-              e.stopPropagation(); // Evita marcar como concluído ao clicar no botão
+              e.stopPropagation(); // Impede que o clique marque a aula como concluída
               setMostrarVideo(!mostrarVideo);
             }}
           >
@@ -27,6 +30,7 @@ function Aula({ nome, video, concluido, onAulaClick }) {
         )}
       </div>
 
+      {/* Se o utilizador clicou em mostrar, exibe o player do YouTube */}
       {mostrarVideo && video && (
         <div className="video-container">
           <VideoAula videoId={video.id} titulo={video.titulo} />

@@ -4,7 +4,7 @@ function VideoAula({ videoId, titulo }) {
   if (!videoId) return null;
 
   return (
-    <div style={{ marginTop: '10px', marginBottom: '10px' }}>
+    <div style={{ marginTop: '10px', marginBottom: '20px' }}>
       <h4 style={{fontSize: '14px', color: '#a5b4fc', marginBottom: '5px'}}>
         Sugestão: {titulo}
       </h4>
