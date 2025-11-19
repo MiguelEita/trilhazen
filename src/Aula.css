@@ -1,6 +1,9 @@
-/* O contêiner de cada aula individual */
+.aula-container {
+  margin-bottom: 8px;
+}
+
 .aula-item {
-  display: flex;
+  display: flex; 
   align-items: flex-start;
   padding: 10px 8px;
   margin: 4px 0;
@@ -9,35 +12,58 @@
   transition: all 0.2s ease;
 }
 
-/* Efeito de hover para mostrar que é clicável */
 .aula-item:hover {
-  background-color: #374151; /* Cinza-escuro (do nosso tema) */
+  background-color: #374151; 
 }
 
-/* O ícone de checkbox [ ] ou [✓] */
 .checkbox-icon {
   margin-right: 12px;
   font-weight: 700;
-  font-family: monospace; /* Deixa o [ ] mais bonito */
+  font-family: monospace; 
   font-size: 16px;
 }
 
-/* O nome da aula */
 .aula-nome {
-  color: #d1d5db; /* Cinza-claro (do nosso tema) */
-  flex: 1; /* <-- ADICIONE ISTO (diz "ocupe o resto do espaço") */
-  word-break: break-word; /* <-- ADICIONE ISTO (força a quebra da linha) */
+  color: #d1d5db; 
+  flex: 1; 
+  word-break: break-word; 
 }
 
-
-/* --- A MÁGICA QUANDO É CLICADO --- */
-
-/* Estilo que é aplicado quando a aula tem a classe 'concluida' */
 .aula-item.concluida .aula-nome {
-  text-decoration: line-through; /* Risca o texto */
-  color: #4b5563; /* Deixa o texto cinza e apagado */
+  text-decoration: line-through; 
+  color: #4b5563; 
 }
 
 .aula-item.concluida .checkbox-icon {
-  color: #22c55e; /* Deixa o [✓] verde! */
+  color: #22c55e; 
+}
+
+/* Botão de Vídeo */
+.btn-ver-video {
+  background: none;
+  border: 1px solid #4b5563;
+  color: #a5b4fc;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  margin-left: 10px;
+  width: auto; 
+  display: inline-block;
+  white-space: nowrap; /* Garante que o texto não quebra */
+}
+
+.btn-ver-video:hover {
+  background-color: #374151;
+}
+
+/* Container do Vídeo (Aparece em baixo da aula) */
+.video-container {
+  padding: 10px;
+  background-color: #111827;
+  border-radius: 0 0 8px 8px;
+  border: 1px solid #374151;
+  border-top: none;
+  margin-top: -4px; 
+  margin-left: 30px; /* Indenta para alinhar com o texto */
 }

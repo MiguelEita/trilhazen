@@ -6,20 +6,29 @@ import { useOutletContext } from 'react-router-dom';
 import Aula from '../Aula';
 import MindCarePopup from '../MindCarePopup';
 import CapsulaDoTempo from '../CapsulaDoTempo';
-import MoodTracker from '../components/MoodTracker'; // Importamos o MoodTracker
+import MoodTracker from '../components/MoodTracker';
 
 function DashboardPage() {
   
   // Recebe os dados globais vindos do Layout/App.js
-  const { user, objetivo, preferencias, trilha } = useOutletContext();
+  // Nota: 'trilha' aqui pode vir do Firestore (se já salvo) ou ser null
+  const { user, objetivo, preferencias, trilha: trilhaInicial } = useOutletContext();
   
+  const [trilha, setTrilha] = useState(trilhaInicial);
   const [progresso, setProgresso] = useState({});
   const [showPopup, setShowPopup] = useState(false);
+  const [loadingTrilha, setLoadingTrilha] = useState(false);
   
+  // Atualiza a trilha local se o contexto mudar (ex: carregou do Firestore)
+  useEffect(() => {
+    if (trilhaInicial) {
+      setTrilha(trilhaInicial);
+    }
+  }, [trilhaInicial]);
+
   // --- Ouvinte do Progresso (Lê do Banco de Dados) ---
   useEffect(() => {
     if (user && objetivo) {
-      // Remove caracteres especiais para criar um ID seguro
       const safeObjective = objetivo.replace(/[^a-zA-Z0-9]/g, '_');
       const docPath = `progresso/${user.uid}/trilhas/${safeObjective}`;
       const docRef = doc(db, docPath);
@@ -50,38 +59,46 @@ function DashboardPage() {
   // --- Função para Salvar Progresso ao Clicar ---
   const handleAulaClick = async (nomeDaAula) => {
     const novoProgresso = { ...progresso };
-    novoProgresso[nomeDaAula] = !novoProgresso[nomeDaAula]; // Inverte (true/false)
-    setProgresso(novoProgresso); // Atualiza visualmente rápido
+    novoProgresso[nomeDaAula] = !novoProgresso[nomeDaAula]; 
+    setProgresso(novoProgresso);
 
     try {
       const safeObjective = objetivo.replace(/[^a-zA-Z0-9]/g, '_');
       const docPath = `progresso/${user.uid}/trilhas/${safeObjective}`;
       const docRef = doc(db, docPath);
-      // Salva no Firebase
       await setDoc(docRef, { aulas: novoProgresso }, { merge: true });
     } catch (error) {
       console.error("Erro ao salvar progresso: ", error);
     }
   };
 
-  // Se não houver trilha carregada (ex: acesso direto sem criar)
-  if (!trilha) {
-    return (
+  // Se não houver trilha, mostra mensagem (ou poderia tentar buscar novamente)
+  if (!trilha && !loadingTrilha) {
+     // Se chegamos aqui sem trilha, provavelmente é porque o usuário
+     // acessou a rota / diretamente sem passar pelo "Nova Trilha".
+     return (
       <div className="dashboard">
         <h1>Bem-vindo!</h1>
-        <p>Você ainda não tem uma trilha ativa. Por favor, vá em "Nova Trilha" para criar uma.</p>
+        <p>Você ainda não tem uma trilha ativa para "{objetivo}".</p>
+        <p>Por favor, vá em "Nova Trilha" para criar uma.</p>
       </div>
     );
+  }
+
+  if (loadingTrilha) {
+      return (
+        <div className="dashboard">
+          <p>Carregando sua trilha e vídeos...</p>
+        </div>
+      )
   }
 
   return (
     <div className="dashboard">
       {showPopup && <MindCarePopup onClose={fecharPopup} />}
       
-      {/* 1. MOOD TRACKER (Topo) */}
       <MoodTracker />
 
-      {/* 2. A TRILHA (Meio) */}
       <div>
         <h1>Sua Trilha: {objetivo}</h1>
         <p>Baseado no seu perfil (que não gosta de {preferencias}), aqui está seu plano:</p>
@@ -89,19 +106,27 @@ function DashboardPage() {
         {trilha.map((mod, index) => (
           <div className="module" key={index}>
             <h3>{mod.modulo}</h3>
-            {mod.aulas.map((aula, i) => (
-              <Aula 
-                key={i} 
-                nome={aula} 
-                concluido={progresso[aula] || false} 
-                onAulaClick={() => handleAulaClick(aula)}
-              />
-            ))}
+            {mod.aulas.map((aulaObj, i) => {
+               // Lógica para suportar tanto o formato antigo (string) quanto o novo (objeto com vídeo)
+               // A API nova retorna objetos: { titulo: "Nome", video: { id: "...", ... } }
+               const nomeAula = typeof aulaObj === 'string' ? aulaObj : aulaObj.titulo;
+               const videoInfo = typeof aulaObj === 'string' ? null : aulaObj.video;
+
+               return (
+                <Aula 
+                    key={i} 
+                    nome={nomeAula}
+                    // Passa o objeto de vídeo para o componente Aula (que deve saber renderizá-lo)
+                    video={videoInfo} 
+                    concluido={progresso[nomeAula] || false} 
+                    onAulaClick={() => handleAulaClick(nomeAula)}
+                />
+               );
+            })}
           </div>
         ))}
       </div>
       
-      {/* 3. CÁPSULA DO TEMPO (Fundo) */}
       <CapsulaDoTempo />
       
     </div>

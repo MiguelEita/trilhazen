@@ -1,23 +1,37 @@
-import React from 'react';
-import './Aula.css'; // O estilo que já criamos
+import React, { useState } from 'react';
+import './Aula.css';
+import VideoAula from './components/VideoAula'; // Ajusta o caminho se necessário
 
-// O componente agora recebe DUAS propriedades:
-// 1. 'nome': O nome da aula (como antes)
-// 2. 'concluido': Um boolean (true/false) vindo do App.js
-// 3. 'onAulaClick': A FUNÇÃO que ele deve chamar quando for clicado
-function Aula({ nome, concluido, onAulaClick }) {
+function Aula({ nome, video, concluido, onAulaClick }) {
+  const [mostrarVideo, setMostrarVideo] = useState(false);
 
-  // O 'useState' foi REMOVIDO daqui.
-
-  // O 'onClick' agora chama a função que veio do "pai" (App.js)
-  // O 'className' é definido pelo boolean 'concluido'
   return (
-    <div 
-      className={`aula-item ${concluido ? 'concluida' : ''}`} 
-      onClick={onAulaClick} // Chama a função do App.js
-    >
-      <span className="checkbox-icon">{concluido ? '[✓]' : '[ ]'}</span>
-      <span className="aula-nome">{nome}</span>
+    <div className="aula-container">
+      <div 
+        className={`aula-item ${concluido ? 'concluida' : ''}`} 
+        onClick={onAulaClick}
+      >
+        <span className="checkbox-icon">{concluido ? '[✓]' : '[ ]'}</span>
+        <span className="aula-nome">{nome}</span>
+        
+        {video && (
+          <button 
+            className="btn-ver-video"
+            onClick={(e) => {
+              e.stopPropagation(); // Evita marcar como concluído ao clicar no botão
+              setMostrarVideo(!mostrarVideo);
+            }}
+          >
+            {mostrarVideo ? 'Ocultar Vídeo' : '🎥 Ver Vídeo'}
+          </button>
+        )}
+      </div>
+
+      {mostrarVideo && video && (
+        <div className="video-container">
+          <VideoAula videoId={video.id} titulo={video.titulo} />
+        </div>
+      )}
     </div>
   );
 }
