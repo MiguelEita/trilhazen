@@ -1,0 +1,148 @@
+/* Container Principal */
+.comunidade-container {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.comunidade-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.comunidade-header h1 {
+  color: #f9fafb;
+  margin-bottom: 10px;
+}
+
+.comunidade-header p {
+  color: #9ca3af;
+}
+
+/* --- FORMULÁRIO DE NOVO POST --- */
+.novo-post-box {
+  background-color: #1f2937;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #374151;
+  margin-bottom: 40px;
+}
+
+.novo-post-box h3 {
+  color: #a5b4fc; /* Roxo claro */
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.input-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.comunidade-input {
+  flex: 1;
+  padding: 12px;
+  background-color: #374151;
+  border: 1px solid #4b5563;
+  border-radius: 8px;
+  color: #f9fafb;
+  font-family: 'Inter', sans-serif;
+}
+
+.comunidade-select {
+  padding: 12px;
+  background-color: #374151;
+  border: 1px solid #4b5563;
+  border-radius: 8px;
+  color: #f9fafb;
+  font-family: 'Inter', sans-serif;
+}
+
+.btn-publicar {
+  width: 100%;
+  padding: 12px;
+  background-color: #22c55e; /* Verde */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-publicar:hover {
+  background-color: #16a34a;
+}
+
+/* --- LISTA DE POSTS (FEED) --- */
+.feed-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.post-card {
+  background-color: #1f2937;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #374151;
+  transition: transform 0.2s;
+}
+
+.post-card:hover {
+  border-color: #6366f1; /* Borda roxa no hover */
+}
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.post-tag {
+  background-color: #374151;
+  color: #a5b4fc;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.post-autor {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.post-card h4 {
+  margin: 0 0 10px 0;
+  color: #f9fafb;
+  font-size: 18px;
+}
+
+.post-card p {
+  color: #d1d5db;
+  font-size: 14px;
+  margin-bottom: 15px;
+  line-height: 1.5;
+}
+
+.post-link {
+  display: inline-block;
+  color: #60a5fa; /* Azul */
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.post-link:hover {
+  text-decoration: underline;
+}
+
+/* Responsividade para mobile */
+@media (max-width: 600px) {
+  .input-group {
+    flex-direction: column;
+  }
+}

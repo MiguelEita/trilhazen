@@ -1,0 +1,149 @@
+/* --- RESET GLOBAL PARA EVITAR ERROS DE TAMANHO --- */
+* {
+  box-sizing: border-box;
+}
+
+/* --- LAYOUT GERAL --- */
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-content {
+  flex: 1;
+  padding-bottom: 80px; /* Espaço extra para o rodapé */
+  background-color: #111827;
+}
+
+/* --- NAVEGAÇÃO MOBILE (Rodapé Fixo) --- */
+.app-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 75px; 
+  
+  background-color: #1f2937;
+  border-top: 1px solid #374151;
+  
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 100;
+  
+  /* Ajustes para garantir que cabe tudo e respeita áreas seguras do iPhone */
+  padding-top: 5px;
+  padding-bottom: max(10px, env(safe-area-inset-bottom)); 
+}
+
+/* O Link (Item de Navegação) */
+.nav-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  
+  text-decoration: none;
+  color: #9ca3af;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  flex: 1;
+}
+
+/* Ícone */
+.nav-icon {
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+
+/* Texto Pequeno */
+.nav-text {
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+/* Estados */
+.nav-link.active, .nav-link:hover {
+  color: #a5b4fc;
+}
+
+.nav-link.active .nav-icon {
+  transform: translateY(-2px);
+}
+
+.nav-logout {
+  color: #ef4444;
+}
+.nav-logout:hover {
+  color: #f87171;
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+
+/* --- LAYOUT DESKTOP (PC) --- */
+@media (min-width: 768px) {
+  
+  .app-layout {
+    flex-direction: row;
+  }
+
+  .app-content {
+    padding-bottom: 0;
+    padding-left: 260px;
+  }
+  
+  .app-nav {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 240px;
+    height: 100vh; /* Altura total */
+    
+    border-top: none;
+    border-right: 1px solid #374151;
+    
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    
+    /* Padding ajustado: Mais espaço em baixo para o botão Sair não colar */
+    padding: 30px 15px;
+    padding-bottom: 40px; /* Aumentei para garantir visibilidade */
+  }
+
+  .nav-link {
+    flex-direction: row;
+    justify-content: flex-start;
+    flex: 0;
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 12px 20px;
+  }
+
+  .nav-icon {
+    font-size: 20px;
+    margin-bottom: 0;
+    margin-right: 15px;
+  }
+
+  .nav-text {
+    font-size: 16px;
+    line-height: normal;
+  }
+
+  .nav-link.active {
+    background-color: #374151;
+    color: #a5b4fc;
+  }
+
+  /* O botão Sair fica no fundo, mas agora com o padding-bottom de 40px, vai subir */
+  .nav-logout {
+    margin-top: auto;
+  }
+}
